@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chart Test - D3</title>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="https://d3js.org/d3-array.v2.min.js"></script>
+    </head>
+
+    <body>
+        <div class="control">
+            <h3>line Test</h3>
+            <label>chart count</label>
+            <input type="text" id="line-input-chart-count" value="20" />
+            <label>line count</label>
+            <input type="text" id="line-input-line-count" value="100" />
+            <label>point count</label>
+            <input type="text" id="line-input-point-count" value="100" />
+            <label>max y</label>
+            <input type="text" id="line-input-max-y" value="1000" />
+            <label>start min y</label>
+            <input type="text" id="line-input-start-min-y" value="0" />
+            <label>start max y</label>
+            <input type="text" id="line-input-start-max-y" value="1000" />
+            <label>clip</label>
+            <input type="checkbox" id="line-input-clip" checked />
+            <button id="line-button-generate">generate</button>
+        </div>
+        <div id="root"></div>
+    </body>
+
+    <style>
+svg text {
+    cursor: default;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+svg text::selection {
+    background: none;
+}
+svg {
+    display: block;
+    margin: 50px;
+}
+.control {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+}
+    </style>
+
+    <script>
+        let random_int = (min, max) => {
+          return Math.floor(Math.random() * Math.floor(max - min)) + min;
+        }
+
+        let clamp = (num, min, max) => {
+          return num <= min ? min : num >= max ? max : num;
+        }
+
+        let get_line_config = () => ({
+            chart_count: parseInt(document.getElementById('line-input-chart-count').value),
+            line_count: parseInt(document.getElementById('line-input-line-count').value),
+            point_count: parseInt(document.getElementById('line-input-point-count').value),
+            max_y: parseInt(document.getElementById('line-input-max-y').value),
+            start_min_y: parseInt(document.getElementById('line-input-start-min-y').value),
+            start_max_y: parseInt(document.getElementById('line-input-start-max-y').value),
+            clip: document.getElementById('line-input-clip').checked
+        });
+
+        let generate_line_data = config => {
+            let data = new Array(config.chart_count).fill().map(x => ({
+                lines: new Array(config.line_count).fill().map((x, k) => {
+                    let points = new Array(config.point_count).fill();
+                    points[0] = random_int(config.start_min_y, config.start_max_y);
+                    for (let i = 1; i < points.length; i++) {
+                        points[i] = clamp(points[i - 1] + random_int(-10, 10), 0, config.max_y - 1);
+                    }
+                    return { points };
+                })
+            }));
+            return data;
+        };
+
+        let render_line_charts = (data, config) => {
+            let width = 800;
+            let height = 600;
+            let margin = 20;
+
+            let light_blue = '#e8f6ff';
+            let blue = '#318bc4';
+
+            let scale_x = d3.scaleLinear().domain([0, config.point_count - 1]).range([0, width]);
+            let scale_y = d3.scaleLinear().domain([0, config.max_y - 1]).range([height, 0]);
+            let curr_scale_x = d3.scaleLinear().domain([0, config.point_count - 1]).range([0, width]);
+
+            let charts = d3.select('#root').html('')
+                .selectAll('svg')
+                .data(data)
+                .join('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('overflow', 'visible')
+                .each(function (d, i) {
+                    d3.select(this)
+                        .append('defs')
+                        .append('clipPath')
+                        .attr('id', `clip-${i}`)
+                        .append('rect')
+                        .attr('x', 0)
+                        .attr('y', 0)
+                        .attr('width', width)
+                        .attr('height', height);
+                    d3.select(this)
+                        .append('g')
+                        .attr('class', 'lines-container')
+                        .attr('clip-path', config.clip ? `url(#clip-${i})` : null)
+                        .append('g')
+                        .attr('class', 'lines')
+                        .attr('fill', 'none')
+                        .attr('stroke', blue)
+                        .attr('stroke-width', 2)
+                        .selectAll('path.line')
+                        .data(d.lines)
+                        .join('path')
+                        .attr('class', 'line')
+                        .attr('data-line', (d, i) => i)
+                        .datum(d => d.points)
+                        .attr('d', d3.line().x((d, i) => scale_x(i)).y(d => scale_y(d)))
+                        .on('click', function (d, i) {
+                            alert(`line ${i} clicked`);
+                        });
+                    d3.select(this)
+                        .append('g')
+                        .attr('class', 'axis-x')
+                        .attr('transform', `translate(0, ${height})`)
+                        .call(d3.axisBottom(curr_scale_x));
+                    d3.select(this)
+                        .append('g')
+                        .attr('class', 'axis-y')
+                        .call(d3.axisLeft(scale_y));
+                })
+                .on('mouseenter', function () {
+                    d3.select(this)
+                        .selectAll('path.line')
+                        .attr('stroke', light_blue);
+                    d3.select(this)
+                        .append('text')
+                        .attr('class', 'tooltip')
+                        .attr('font-family', 'sans-serif')
+                        .attr('stroke', blue);
+                    d3.select(this)
+                        .append('circle')
+                        .attr('fill', blue)
+                        .attr('r', 3);
+                })
+                .on('mousemove', function (d) {
+                    let [x, y] = d3.mouse(this);
+                    x = clamp(x, curr_scale_x.range()[0], curr_scale_x.range()[1]);
+                    y = clamp(y, scale_y.range()[1], scale_y.range()[0]);
+                    let data_x = Math.floor(curr_scale_x.invert(x));
+                    let invert_y = scale_y.invert(y);
+                    let points = d.lines.map(d => d.points[data_x]);
+                    let data_y_index = d3.leastIndex(points, d => Math.abs(d - invert_y));
+                    let data_y = d.lines[data_y_index].points[data_x];
+
+                    d3.select(this)
+                        .selectAll('path.line')
+                        .attr('stroke', light_blue);
+                    d3.select(this)
+                        .select(`path.line[data-line="${data_y_index}"]`)
+                        .attr('stroke', blue)
+                        .raise();
+                    d3.select(this)
+                        .select('text.tooltip')
+                        .text(`line ${data_y_index}`)
+                        .attr('x', curr_scale_x(data_x) - 10)
+                        .attr('y', scale_y(data_y) - 10);
+                    d3.select(this)
+                        .select('circle')
+                        .attr('cx', curr_scale_x(data_x))
+                        .attr('cy', scale_y(data_y));
+                })
+                .on('mouseleave', function () {
+                    d3.select(this)
+                        .selectAll('path.line')
+                        .attr('stroke', blue);
+                    d3.select(this)
+                        .select('text.tooltip')
+                        .remove();
+                    d3.select(this)
+                        .select('circle')
+                        .remove();
+                })
+                .call(d3.zoom()
+                    .scaleExtent([1, Infinity])
+                    .translateExtent([[0, 0], [width, height]])
+                    .on('zoom', function () {
+                        let transform = d3.event.transform;
+                        d3.select(this)
+                            .select('g.lines')
+                            .attr('transform', `translate(${transform.x}, 0) scale(${transform.k}, 1)`)
+                        curr_scale_x = transform.rescaleX(scale_x);
+                        d3.select(this)
+                            .select('g.axis-x')
+                            .call(d3.axisBottom(curr_scale_x))
+                    }));
+        };
+
+        document.getElementById('line-button-generate').addEventListener('click', () => {
+            let config = get_line_config();
+            let data = generate_line_data(config);
+            render_line_charts(data, config);
+        });
+    </script>
+</html>
+
