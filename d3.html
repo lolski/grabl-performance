@@ -8,24 +8,6 @@
     </head>
 
     <body>
-        <div class="control">
-            <h3>line Test</h3>
-            <label>chart count</label>
-            <input type="text" id="line-input-chart-count" value="20" />
-            <label>line count</label>
-            <input type="text" id="line-input-line-count" value="100" />
-            <label>point count</label>
-            <input type="text" id="line-input-point-count" value="100" />
-            <label>max y</label>
-            <input type="text" id="line-input-max-y" value="1000" />
-            <label>start min y</label>
-            <input type="text" id="line-input-start-min-y" value="0" />
-            <label>start max y</label>
-            <input type="text" id="line-input-start-max-y" value="1000" />
-            <label>clip</label>
-            <input type="checkbox" id="line-input-clip" checked />
-            <button id="line-button-generate">generate</button>
-        </div>
         <div id="root"></div>
     </body>
 
@@ -59,16 +41,6 @@ svg {
         let clamp = (num, min, max) => {
           return num <= min ? min : num >= max ? max : num;
         }
-
-        let get_line_config = () => ({
-            chart_count: parseInt(document.getElementById('line-input-chart-count').value),
-            line_count: parseInt(document.getElementById('line-input-line-count').value),
-            point_count: parseInt(document.getElementById('line-input-point-count').value),
-            max_y: parseInt(document.getElementById('line-input-max-y').value),
-            start_min_y: parseInt(document.getElementById('line-input-start-min-y').value),
-            start_max_y: parseInt(document.getElementById('line-input-start-max-y').value),
-            clip: document.getElementById('line-input-clip').checked
-        });
 
         let generate_line_data = config => {
             let data = new Array(config.chart_count).fill().map(x => ({
@@ -208,12 +180,19 @@ svg {
                             .call(d3.axisBottom(curr_scale_x))
                     }));
         };
-
-        document.getElementById('line-button-generate').addEventListener('click', () => {
-            let config = get_line_config();
-            let data = generate_line_data(config);
-            render_line_charts(data, config);
-        });
+    
+        let config = {
+            chart_count: 15,
+            line_count: 500,
+            point_count: 1000,
+            max_y: 1000,
+            start_min_y: 0,
+            start_max_y: 1000,
+            clip: false
+        }
+        let data = generate_line_data(config);
+        render_line_charts(data, config);
+        
     </script>
 </html>
 
