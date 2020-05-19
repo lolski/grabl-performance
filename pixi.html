@@ -4,26 +4,7 @@
         <title>Chart Test - Pixi</title>
     </head>
     <body>
-        <div id="a0"></div>
-        <div id="a1"></div>
-        <div id="a2"></div>
-        <div id="a3"></div>
-        <div id="a4"></div>
-        <div id="a5"></div>
-        <div id="a6"></div>
-        <div id="a7"></div>
-        <div id="a8"></div>
-        <div id="a9"></div>
-        <div id="a10"></div>
-        <div id="a11"></div>
-        <div id="a12"></div>
-        <div id="a13"></div>
-        <div id="a14"></div>
-        <div id="a15"></div>
-        <div id="a16"></div>
-        <div id="a17"></div>
-        <div id="a18"></div>
-        <div id="a19"></div>
+        <div id="graphics"></div>
     </body>
     <style>
 
@@ -36,22 +17,15 @@
         else {
             PIXI.utils.sayHello('Canvas')
         }
-        let charts = []
-        for (let c = 0; c < 16; ++c) {
-            charts[c] = new PIXI.Application({width: 800, height: 600});
-            for (let l = 0; l < 1000; ++l) {
-                let line = new PIXI.Graphics();
-                line.lineStyle(2, 100+l, 1);
-                line.moveTo(0, 0);
-                for (let d = 0; d < 1000; ++d) {
-                    let x = d*0.8;
-                    let yFloor = l*0.6;
-                    let yVariation = (Math.random()*0.6);
-                    line.lineTo(x, yFloor+yVariation);
-                }
-                charts[c].stage.addChild(line);
-            }
-            document.querySelector("#a" + c).appendChild(charts[c].view);
-        }
+        let app = new PIXI.Application({width: 900, height: 900, backgroundColor: 0});
+        let graphics = new PIXI.Graphics();
+        graphics.lineStyle(2, 0xFF00FF, 1);
+        graphics.beginFill(0x650A5A, 0.25);
+        graphics.drawRoundedRect(50, 440, 100, 100, 16);
+        graphics.interactive = true;
+        graphics.on('pointerdown', (event) => console.log('henlo'));
+        graphics.endFill();
+        app.stage.addChild(graphics);
+        document.querySelector("#graphics").appendChild(app.view);
     </script>
 </html>
