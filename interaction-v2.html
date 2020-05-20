@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <script type="text/javascript" src="./pixi.js"></script>
+    </head>
+    <body>
+        <div id="root"></div>
+    </body>
+    <script type="text/javascript">
+        let app = new PIXI.Application({width: 800, height: 600, backgroundColor: 0x0});
+        let graphics = new PIXI.Graphics();
+
+        // area: start
+        // graphics.beginFill(0xFF0000);
+        // graphics.drawRect(50, 50, 100, 100);
+        // graphics.endFill();
+        // area: end
+        
+        // line: start
+        graphics.lineStyle({width: 1, color: 0xFF0000, alpha: 1});
+        graphics.moveTo(50, 50);
+        graphics.lineTo(100, 100);
+        graphics.lineTo(100, 150);
+        // line: end
+
+        graphics.interactive = true;
+        graphics.on('pointerover', (event) => {
+            console.log('henlo');
+            graphics.clear();
+            graphics.lineStyle({width: 1, color: 0x0000FF, alpha: 1});
+            graphics.moveTo(50, 50);
+            graphics.lineTo(100, 100);
+            graphics.lineTo(100, 150);
+        });
+        console.log("graphics.data: " + graphics.data);
+        console.log("graphics.shape: " + graphics.shape);
+        app.stage.addChild(graphics);
+        document.querySelector("#root").appendChild(app.view);
+    </script>
+</html>

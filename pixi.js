@@ -32158,14 +32158,16 @@ var PIXI = (function (exports) {
 	    {
 	        var graphicsData = this.graphicsData;
 
+			// debugger;
+
 	        for (var i = 0; i < graphicsData.length; ++i)
 	        {
 	            var data = graphicsData[i];
 
-	            if (!data.fillStyle.visible)
-	            {
-	                continue;
-	            }
+	            // if (!data.fillStyle.visible)
+	            // {
+	            //     continue;
+	            // }
 
 	            // only deal with fills..
 	            if (data.shape)
