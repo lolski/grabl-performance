@@ -6,7 +6,7 @@
         <div id="root"></div>
     </body>
     <script type="text/javascript">
-        function newPixiGraphics() {
+        function newPixiGraphicsStraightLine() {
             let graphic = new PIXI.Graphics();
             graphic.geometry.containsPoint = function containsPoint(point) {
                 var tmpPoint = new PIXI.Point();
@@ -21,8 +21,9 @@
                         else {
                             tmpPoint.copyFrom(point);
                         }
-
-                        if (data.shape.contains(tmpPoint.x, tmpPoint.y)) {
+                        let cp = data.shape.contains(tmpPoint.x, tmpPoint.y);
+                        debugger;
+                        if (cp) {
                             var hitHole = false;
                             if (data.holes) {
                                 for (var i$1 = 0; i$1 < data.holes.length; i$1++) {
@@ -54,14 +55,8 @@
             graphic.lineTo(50, 100);
         }
 
-        function drawBezier(graphic, color) {
-            graphic.clear();
-            graphic.lineStyle({width: 1, color: color, alpha: 1});
-            graphic.bezierCurveTo(0, 0, 50, 50, 0, 50);
-        }
-
         let app = new PIXI.Application({width: 800, height: 600, backgroundColor: 0x0});
-        let line = newPixiGraphics();
+        let line = newPixiGraphicsStraightLine();
         line.position.x = 50;
         line.position.y = 50;
         line.interactive = true;
@@ -73,19 +68,6 @@
             drawLine(line, 0xFF0000)
         })
         app.stage.addChild(line);
-        let bezier = newPixiGraphics();
-        bezier.position.x = 150;
-        bezier.position.y = 50;
-        bezier.interactive = true;
-        drawBezier(bezier, 0xFF0000);
-        bezier.on('pointerover', (event) => {
-            drawBezier(bezier, 0x0000FF)
-        });
-        bezier.on('pointerout', (event) => {
-            drawBezier(bezier, 0xFF0000)
-        });
-        
-        app.stage.addChild(bezier);
         document.querySelector("#root").appendChild(app.view);
     </script>
 </html>
