@@ -6,6 +6,46 @@
         <div id="root"></div>
     </body>
     <script type="text/javascript">
+        function newPixiGraphics() {
+            let graphic = new PIXI.Graphics();
+            graphic.geometry.containsPoint = function containsPoint(point) {
+                var tmpPoint = new PIXI.Point();
+                var graphicsData = this.graphicsData;
+                for (var i = 0; i < graphicsData.length; ++i) {
+                    var data = graphicsData[i];
+                    
+                    if (data.shape) {
+                        if (data.matrix) {
+                            data.matrix.applyInverse(point, tmpPoint);
+                        }
+                        else {
+                            tmpPoint.copyFrom(point);
+                        }
+
+                        if (data.shape.contains(tmpPoint.x, tmpPoint.y)) {
+                            var hitHole = false;
+                            if (data.holes) {
+                                for (var i$1 = 0; i$1 < data.holes.length; i$1++) {
+                                    var hole = data.holes[i$1];
+                                    if (hole.shape.contains(tmpPoint.x, tmpPoint.y)) {
+                                        hitHole = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!hitHole) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+            return graphic;
+        }
+        
         function drawLine(graphic, color) {
             graphic.clear();
             graphic.lineStyle({width: 1, color: color, alpha: 1});
@@ -21,7 +61,7 @@
         }
 
         let app = new PIXI.Application({width: 800, height: 600, backgroundColor: 0x0});
-        let line = new PIXI.Graphics();
+        let line = newPixiGraphics();
         line.position.x = 50;
         line.position.y = 50;
         line.interactive = true;
@@ -33,7 +73,7 @@
             drawLine(line, 0xFF0000)
         })
         app.stage.addChild(line);
-        let bezier = new PIXI.Graphics();
+        let bezier = newPixiGraphics();
         bezier.position.x = 150;
         bezier.position.y = 50;
         bezier.interactive = true;
@@ -43,7 +83,8 @@
         });
         bezier.on('pointerout', (event) => {
             drawBezier(bezier, 0xFF0000)
-        })
+        });
+        
         app.stage.addChild(bezier);
         document.querySelector("#root").appendChild(app.view);
     </script>
