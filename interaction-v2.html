@@ -9,12 +9,12 @@
         function newPixiGraphicsStraightLine() {
             let graphic = new PIXI.Graphics();
             graphic.geometry.containsPoint = function containsPoint(point) {
-                var tmpPoint = new PIXI.Point();
                 var graphicsData = this.graphicsData;
                 for (var i = 0; i < graphicsData.length; ++i) {
                     var data = graphicsData[i];
                     
                     if (data.shape) {
+                        var tmpPoint = new PIXI.Point();
                         if (data.matrix) {
                             data.matrix.applyInverse(point, tmpPoint);
                         }
@@ -28,8 +28,19 @@
                             let y1 = data.points[i+1];
                             let x2 = data.points[i+2];
                             let y2 = data.points[i+3];
-                            if (true) {
-                                hit = true;
+                            let m = (y2-y1) / (x2-x1);
+                            
+                            var withinBoundingBox =
+                                tmpPoint.x >= x1 && tmpPoint.x <= x2 &&
+                                tmpPoint.y >= y1 && tmpPoint.y <= y2;
+                            if (withinBoundingBox) {
+                                if (
+                                    (tmpPoint.y-y1) >= m*(tmpPoint.x-x1)-10 &&
+                                    (tmpPoint.y-y1) <= m*(tmpPoint.x-x1)+10
+                                ) {
+                                    hit = true;
+                                    break;
+                                }
                             }
                         }
                         return hit;
@@ -46,7 +57,9 @@
             graphic.lineStyle({width: 1, color: color, alpha: 1});
             graphic.moveTo(0, 0);
             graphic.lineTo(50, 50);
-            graphic.lineTo(50, 100);
+            graphic.lineTo(100, 200);
+            graphic.lineTo(300, 300);
+            graphic.lineTo(350, 550);
         }
 
         let app = new PIXI.Application({width: 800, height: 600, backgroundColor: 0x0});
