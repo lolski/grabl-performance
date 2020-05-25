@@ -73,8 +73,8 @@
                 let line = new PIXI.Graphics();
                 line.lineStyle({width: 1, color: 0x318bc4, alpha: 1});
                 line.moveTo(scale_x(0), scale_y(0));
-                for (let dp_idx = 0; dp_idx < data[0].lines[dl_idx].points.length; ++dp_idx) {
-                    line.lineTo(scale_x(dp_idx), scale_y(data[0].lines[dl_idx].points[dp_idx]));
+                for (let dp_idx = 0; dp_idx < data[dc_idx].lines[dl_idx].points.length; ++dp_idx) {
+                    line.lineTo(scale_x(dp_idx), scale_y(data[dc_idx].lines[dl_idx].points[dp_idx]));
                 }
                 chart.stage.addChild(line);
             }

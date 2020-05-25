@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chart Test - Pixi</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="https://d3js.org/d3-array.v2.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+    <script type="text/javascript">
+        let config = {
+            line_count: 100,
+            point_count: 1000,
+            max_y: 1000,
+            start_min_y: 0,
+            start_max_y: 1000,
+        }
+
+        let random_int = (min, max) => {
+          return Math.floor(Math.random() * Math.floor(max - min)) + min;
+        }
+
+        let clamp = (num, min, max) => {
+          return num <= min ? min : num >= max ? max : num;
+        }
+
+        let generate_line_data = config => {
+            let data = {
+                lines: new Array(config.line_count).fill().map((x, k) => {
+                    let points = new Array(config.point_count).fill();
+                    points[0] = random_int(config.start_min_y, config.start_max_y);
+                    for (let i = 1; i < points.length; i++) {
+                        points[i] = clamp(points[i - 1] + random_int(-10, 10), 0, config.max_y - 1);
+                    }
+                    return { points };
+                })
+            };
+            return data;
+        };
+        class Lines {
+            constructor(config, data, style) {
+                this.config = config;
+                this.data = data;
+                this.style = style;
+                this.pixiApp = new PIXI.Application(style);
+                let lines = this.lines();
+                for (let i = 0; i < lines.length; i++) {
+                    this.pixiApp.stage.addChild(lines[i]);
+                }
+            }
+
+            getDisplayArea() {
+                return this.pixiApp.view;
+            }
+
+            lines() {
+                let scale_x = d3.scaleLinear().domain([0, this.config.point_count - 1]).range([0, this.style.width]);
+                let scale_y = d3.scaleLinear().domain([0, this.config.max_y - 1]).range([this.style.height, 0]);
+
+                var lines = []
+                for (let dl_idx = 0; dl_idx < this.data.lines.length; dl_idx++) {
+                    let line = new PIXI.Graphics();
+                    line.lineStyle({width: 1, color: 0x318bc4, alpha: 1});
+                    line.moveTo(scale_x(0), scale_y(0));
+                    for (let dp_idx = 0; dp_idx < this.data.lines[dl_idx].points.length; ++dp_idx) {
+                        line.lineTo(scale_x(dp_idx), scale_y(this.data.lines[dl_idx].points[dp_idx]));
+                    }
+                    lines[dl_idx] = line;
+                }
+                return lines;
+            }
+        }
+
+        class Trends {
+
+        }
+
+        class TraceOverview {
+            constructor(data) {
+
+            }
+        }
+
+        class TraceGroup {
+            constructor(data) {
+
+            }
+        }
+
+        var data = generate_line_data(config);
+        var lineChart = new Lines(config, data, { width: 800, height: 600, backgroundColor: 0xFFFFFF });
+        document.querySelector("#chart").appendChild(lineChart.getDisplayArea());
+
+        // let random_int = (min, max) => {
+        //   return Math.floor(Math.random() * Math.floor(max - min)) + min;
+        // }
+
+        // let clamp = (num, min, max) => {
+        //   return num <= min ? min : num >= max ? max : num;
+        // }
+
+        // let generate_line_data = config => {
+        //     let data = {
+        //         lines: new Array(config.line_count).fill().map((x, k) => {
+        //             let points = new Array(config.point_count).fill();
+        //             points[0] = random_int(config.start_min_y, config.start_max_y);
+        //             for (let i = 1; i < points.length; i++) {
+        //                 points[i] = clamp(points[i - 1] + random_int(-10, 10), 0, config.max_y - 1);
+        //             }
+        //             return { points };
+        //         })
+        //     };
+        //     return data;
+        // };
+        // // main
+        // let width = 800;
+        // let height = 600;
+        // let config = {
+        //     chart_count: 10,
+        //     line_count: 1000,
+        //     point_count: 1000,
+        //     max_y: 1000,
+        //     start_min_y: 0,
+        //     start_max_y: 1000,
+        //     clip: false
+        // }
+        // if (PIXI.utils.isWebGLSupported()) {
+        //     console.log("webgl");
+        // }
+        // else {
+        //     console.log("canvas");
+        // }
+        
+        // let scale_x = d3.scaleLinear().domain([0, config.point_count - 1]).range([0, width]);
+        // let scale_y = d3.scaleLinear().domain([0, config.max_y - 1]).range([height, 0]);
+        // let data = generate_line_data(config);
+        // debugger;
+        // let chart = new PIXI.Application({width: width, height: height, backgroundColor: 0xFFFFFF});
+        // for (let dl_idx = 0; dl_idx < data.lines.length; ++dl_idx) {
+        //     let line = new PIXI.Graphics();
+        //     line.lineStyle({width: 1, color: 0x318bc4, alpha: 1});
+        //     line.moveTo(scale_x(0), scale_y(0));
+        //     for (let dp_idx = 0; dp_idx < data.lines[dl_idx].points.length; ++dp_idx) {
+        //         line.lineTo(scale_x(dp_idx), scale_y(data.lines[dl_idx].points[dp_idx]));
+        //     }
+        //     chart.stage.addChild(line);
+        // }
+        // document.querySelector("#chart").appendChild(chart.view);
+    </script>
+</html>
