@@ -22,23 +22,34 @@
         
         // private
         createTraceGroupVisual(traceGroup) {
-            let visual = this.createGraphicsWithBoundingBox();
-            visual.interactive = true;
-            visual.lineStyle({width: 1, color: 0xFF0000, alpha: 1});
-            visual.moveTo(0, 0);
-            for (const key in this.traceGroup) {
-                visual.lineTo(
-                    this.traceGroup[key].iteration * 100,
-                    this.traceGroup[key].duration
-                )
-            }
+            let visual = this.createLine();
+            visual.on('pointerover', (event) => {
+                this.x({width: 1, color: 0x0000FF, alpha: 1}, visual, this.traceGroup);
+            });
+            visual.on('pointerout', (event) => {
+                this.x({width: 1, color: 0xFF0000, alpha: 1}, visual, this.traceGroup);
+            });
+            this.x({width: 1, color: 0xFF0000, alpha: 1}, visual, this.traceGroup);
             return visual;
         }
-        createGraphicsWithBoundingBox() {
+        x(style, visual, traceGroup) {
+            visual.clear();
+            visual.lineStyle(style);
+            visual.moveTo(0, 0);
+            for (const key in traceGroup) {
+                visual.lineTo(
+                    traceGroup[key].iteration * 100,
+                    traceGroup[key].duration
+                )
+            }
+        }
+        createLine() {
             let visual = new PIXI.Graphics();
+            visual.interactive = true;
+            
             visual.geometry.containsPoint = function containsPoint(point) {
                 var graphicsData = this.graphicsData;
-                console.log("henlo")
+                
                 for (var i = 0; i < graphicsData.length; ++i) {
                     var data = graphicsData[i];
                     
@@ -59,10 +70,10 @@
                             let y2 = data.points[i+3];
                             let m = (y2-y1) / (x2-x1);
                             
+                            // the bounding box is kinda buggy tho
                             var withinBoundingBox =
                                 tmpPoint.x >= x1 && tmpPoint.x <= x2 &&
                                 tmpPoint.y >= y1 && tmpPoint.y <= y2;
-                            console.log("within = " + withinBoundingBox);
                             if (withinBoundingBox) {
                                 if (
                                     (tmpPoint.y-y1) >= m*(tmpPoint.x-x1)-10 &&
@@ -141,6 +152,30 @@
                     "id": "ca782356a773bfeb",
                     "iteration": 4,
                     "duration": 71
+                }
+            }
+        },
+        "client.tx.commit:server.tx.commit": {
+            "traces": {
+                "23d3dae56a78b23f": {
+                    "id": "23d3dae56a78b23f",
+                    "iteration": 1,
+                    "duration": 225
+                },
+                "a7827653daf73bfe": {
+                    "id": "a7827653daf73bfe",
+                    "iteration": 3,
+                    "duration": 250
+                },
+                "a784fe6bde23f14a": {
+                    "id": "a784fe6bde23f14a",
+                    "iteration": 4,
+                    "duration": 252
+                },
+                "3bfeb356a77ca782": {
+                    "id": "3bfeb356a77ca782",
+                    "iteration": 6,
+                    "duration": 171
                 }
             }
         }
