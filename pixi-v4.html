@@ -7,26 +7,38 @@
         <div id="chart" style=" width: 1000px; margin: 0 auto;"></div>
     </body>
     <script type="text/javascript">
-    class Line {
-        constructor(traces) {
-            this.traces = traces;
-            this.line = this.newLine();
-            this.setTrace(traces);
+    class TraceGroupLine {
+        // public
+        constructor(traceGroup) {
+            this.setTraceGroup(traceGroup);
         }
-        setTrace(traces) {
-            this.line.clear();
-            this.line.lineStyle({width: 1, color: 0xFF0000, alpha: 1});
-            this.line.moveTo(0, 0);
-            this.line.lineTo(50, 50);
-            this.line.lineTo(100, 200);
+        setTraceGroup(traceGroup) {
+            this.traceGroup = traceGroup;
+            this.traceGroupVisual = this.createTraceGroupVisual(traceGroup);
         }
-        getPixi() {
-            return this.line;
+        getVisual() {
+            return this.traceGroupVisual;
         }
-        newLine() {
-            let graphic = new PIXI.Graphics();
-            graphic.geometry.containsPoint = function containsPoint(point) {
+        
+        // private
+        createTraceGroupVisual(traceGroup) {
+            let visual = this.createGraphicsWithBoundingBox();
+            visual.interactive = true;
+            visual.lineStyle({width: 1, color: 0xFF0000, alpha: 1});
+            visual.moveTo(0, 0);
+            for (const key in this.traceGroup) {
+                visual.lineTo(
+                    this.traceGroup[key].iteration * 100,
+                    this.traceGroup[key].duration
+                )
+            }
+            return visual;
+        }
+        createGraphicsWithBoundingBox() {
+            let visual = new PIXI.Graphics();
+            visual.geometry.containsPoint = function containsPoint(point) {
                 var graphicsData = this.graphicsData;
+                console.log("henlo")
                 for (var i = 0; i < graphicsData.length; ++i) {
                     var data = graphicsData[i];
                     
@@ -50,6 +62,7 @@
                             var withinBoundingBox =
                                 tmpPoint.x >= x1 && tmpPoint.x <= x2 &&
                                 tmpPoint.y >= y1 && tmpPoint.y <= y2;
+                            console.log("within = " + withinBoundingBox);
                             if (withinBoundingBox) {
                                 if (
                                     (tmpPoint.y-y1) >= m*(tmpPoint.x-x1)-10 &&
@@ -66,34 +79,42 @@
 
                 return false;
             }
-            return graphic;
+            return visual;
         }
-        
     }
-    class LineChart {
+    class TraceGroupsChart {
+        // public
         constructor(style, traceGroups) {
             this.pixiApp = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
-            this.traceGroups = traceGroups;
-            this.setTraceGroups(this.traceGroups);
+            this.setTraceGroups(traceGroups);
         }
-        setTraceGroups(traceGroups) {
-            let lines = [];
-            for (const key in traceGroups) {
-                lines.push(new Line(traceGroups[key].traces));
-            }
-            this.pixiApp.stage.removeChildren();
-            for (let i = 0; i < lines.length; i++) {
-                this.pixiApp.stage.addChild(lines[i].getPixi())
-            }
+        setTraceGroups(traceGroups) { 
+            this.traceGroups = traceGroups;
+            this.traceGroupVisuals = this.createTraceGroupVisuals(traceGroups);
+            this.draw();
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
-        getHtml() {
+        getVisual() {
             return this.pixiApp.view;
         }
-        
+
+        // private
+        createTraceGroupVisuals(traceGroups) {
+            let visuals = [];
+            for (const key in traceGroups) {
+                visuals.push(new TraceGroupLine(traceGroups[key].traces));
+            }
+            return visuals;
+        }
+        draw() {
+            this.pixiApp.stage.removeChildren();
+            for (let i = 0; i < this.traceGroupVisuals.length; i++) {
+                this.pixiApp.stage.addChild(this.traceGroupVisuals[i].getVisual())
+            }
+        }
     }
     //
     // main
@@ -124,13 +145,13 @@
             }
         }
     };
-    var lineChart = new LineChart({width: 1000, height: 600}, traceGroups);
-    document.querySelector("#chart").appendChild(lineChart.getHtml());
-    // update dimension: lineChart.setDimension({width: 400, height: 300});
-    // update data: lineChart.setData(data);
-    // display Iteration/Time: lineChart.setXAxisMode(Mode.ITERATION / Mode.TIME)
-    // display Line/Trend: lineChart.setViewMode(Mode.LINE / Mode.TREND)
-    // select a single line: lineChart.selectLine(
+    var traceGroupsChart = new TraceGroupsChart({width: 1000, height: 600}, traceGroups);
+    document.querySelector("#chart").appendChild(traceGroupsChart.getVisual());
+    // update dimension: traceGroupsChart.setDimension({width: 400, height: 300});
+    // update data: traceGroupsChart.setData(data);
+    // display Iteration/Time: traceGroupsChart.setXAxisMode(Mode.ITERATION / Mode.TIME)
+    // display Line/Trend: traceGroupsChart.setViewMode(Mode.LINE / Mode.TREND)
+    // select a single line: traceGroupsChart.selectLine(
     //   'client.tx.execute.insert:server.tx.stream.insert:query.insert'
     // )
 </script>
