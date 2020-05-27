@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
+    </head>
+    <body>
+        <div id="chart"></div>
+    </body>
+    <script type="text/javascript">
+    class TrendAndLineChart {
+        constructor() {}
+        setData(data) {}
+        setDimension(dimension) {}
+        setXAxisMode(mode) {}
+        setViewMode(mode) {}
+        selectLine(line) {}
+        getHtml() {}
+    }
+    //
+    // main
+    //
+    var data = response['performance-analysis']['trace-groups'];
+    var lineChart = new TrendAndLineChart({width: 800, height: 600}, data);
+    document.querySelector("#chart").appendChild(lineChart.getHtml());
+    // update dimension: lineChart.setDimension({width: 400, height: 300});
+    // update data: lineChart.setData(data);
+    // display Iteration/Time: lineChart.setXAxisMode(Mode.ITERATION / Mode.TIME)
+    // display Line/Trend: lineChart.setViewMode(Mode.LINE / Mode.TREND)
+    // select a single line: lineChart.selectLine(
+    //   'client.tx.execute.insert:server.tx.stream.insert:query.insert'
+    // )
+</script>
+</html>
