@@ -3,24 +3,128 @@
     <head>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
     </head>
-    <body>
-        <div id="chart"></div>
+    <body style="background-color: #180e29;">
+        <div id="chart" style=" width: 1000px; margin: 0 auto;"></div>
     </body>
     <script type="text/javascript">
-    class TrendAndLineChart {
-        constructor() {}
-        setData(data) {}
+    class Line {
+        constructor(traces) {
+            this.traces = traces;
+            this.line = this.newLine();
+            this.setTrace(traces);
+        }
+        setTrace(traces) {
+            this.line.clear();
+            this.line.lineStyle({width: 1, color: 0xFF0000, alpha: 1});
+            this.line.moveTo(0, 0);
+            this.line.lineTo(50, 50);
+            this.line.lineTo(100, 200);
+        }
+        getPixi() {
+            return this.line;
+        }
+        newLine() {
+            let graphic = new PIXI.Graphics();
+            graphic.geometry.containsPoint = function containsPoint(point) {
+                var graphicsData = this.graphicsData;
+                for (var i = 0; i < graphicsData.length; ++i) {
+                    var data = graphicsData[i];
+                    
+                    if (data.shape) {
+                        var tmpPoint = new PIXI.Point();
+                        if (data.matrix) {
+                            data.matrix.applyInverse(point, tmpPoint);
+                        }
+                        else {
+                            tmpPoint.copyFrom(point);
+                        }
+                        let hit = false;
+                        // define bounding box
+                        for (let i = 0; i <= data.points.length - 4; i += 2) {
+                            let x1 = data.points[i];
+                            let y1 = data.points[i+1];
+                            let x2 = data.points[i+2];
+                            let y2 = data.points[i+3];
+                            let m = (y2-y1) / (x2-x1);
+                            
+                            var withinBoundingBox =
+                                tmpPoint.x >= x1 && tmpPoint.x <= x2 &&
+                                tmpPoint.y >= y1 && tmpPoint.y <= y2;
+                            if (withinBoundingBox) {
+                                if (
+                                    (tmpPoint.y-y1) >= m*(tmpPoint.x-x1)-10 &&
+                                    (tmpPoint.y-y1) <= m*(tmpPoint.x-x1)+10
+                                ) {
+                                    hit = true;
+                                    break;
+                                }
+                            }
+                        }
+                        return hit;
+                    }
+                }
+
+                return false;
+            }
+            return graphic;
+        }
+        
+    }
+    class LineChart {
+        constructor(style, traceGroups) {
+            this.pixiApp = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
+            this.traceGroups = traceGroups;
+            this.setTraceGroups(this.traceGroups);
+        }
+        setTraceGroups(traceGroups) {
+            let lines = [];
+            for (const key in traceGroups) {
+                lines.push(new Line(traceGroups[key].traces));
+            }
+            this.pixiApp.stage.removeChildren();
+            for (let i = 0; i < lines.length; i++) {
+                this.pixiApp.stage.addChild(lines[i].getPixi())
+            }
+        }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
-        getHtml() {}
+        getHtml() {
+            return this.pixiApp.view;
+        }
+        
     }
     //
     // main
     //
-    var data = response['performance-analysis']['trace-groups'];
-    var lineChart = new TrendAndLineChart({width: 800, height: 600}, data);
+    var traceGroups = {
+        "client.tx.execute.insert:server.tx.stream.insert:query.insert": {
+            "traces": {
+                "ab23fe56a7823d3d": {
+                    "id": "ab23fe56a7823d3d",
+                    "iteration": 1,
+                    "duration": 205
+                },
+                "773bfe65a7823daf": {
+                    "id": "773bfe65a7823daf",
+                    "iteration": 2,
+                    "duration": 50
+                },
+                "f144fe6ba7823dea": {
+                    "id": "f144fe6ba7823dea",
+                    "iteration": 3,
+                    "duration": 52
+                },
+                "ca782356a773bfeb": {
+                    "id": "ca782356a773bfeb",
+                    "iteration": 4,
+                    "duration": 71
+                }
+            }
+        }
+    };
+    var lineChart = new LineChart({width: 1000, height: 600}, traceGroups);
     document.querySelector("#chart").appendChild(lineChart.getHtml());
     // update dimension: lineChart.setDimension({width: 400, height: 300});
     // update data: lineChart.setData(data);
