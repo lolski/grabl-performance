@@ -7,6 +7,12 @@
         <div id="chart" style=" width: 1000px; margin: 0 auto;"></div>
     </body>
     <script type="text/javascript">
+    function createDisplay(style) {
+        let display = new PIXI.Application(style);
+        display.stage.position.y = style.height;
+        display.stage.scale.y = -1;
+        return display;
+    }
     class TraceGroupLine {
         // public
         constructor(traceGroup) {
@@ -93,42 +99,36 @@
         // public
         constructor(style, traceGroups) {
             this.style = style;
-            this.display = new PIXI.Application(
-                { width: style.width, height: style.height, backgroundColor: 0xFFFFFF }
-            );
-            this.display.stage.position.y = this.style.height;
-            this.display.stage.scale.y = -1;
             this.setTraceGroups(traceGroups);
         }
         setTraceGroups(traceGroups) { 
-            this.display.stage.removeChildren();
-            this.paintTraceGroupCanvas(traceGroups)
-            this.display.stage.addChild(
-                this.paintTraceGroupCanvas(traceGroups)
-            );
+            if (this.canvas != null) {
+                this.canvas.removeChildren();
+            }
+            this.canvas = TraceGroupsCanvas.paintTraceGroupCanvas(this.style, traceGroups)
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
-        getDisplay() {
-            return this.display.view;
+        getPainting() {
+            return this.canvas;
         }
         // private
-        paintTraceGroupCanvas(traceGroups) {
+        static paintTraceGroupCanvas(style, traceGroups) {
             let margin = 20;
-            let container = new PIXI.Container();
-            container.position.x = margin;
-            container.position.y = margin;
-            let width = this.style.width - margin*2;
-            let height = this.style.height - margin*2;
+            let canvas = new PIXI.Container();
+            canvas.position.x = margin;
+            canvas.position.y = margin;
+            let width = style.width - margin*2;
+            let height = style.height - margin*2;
             let xaxis = TraceGroupsCanvas.paintXAxis(width);
-            container.addChild(xaxis);
+            canvas.addChild(xaxis);
             let yaxis = TraceGroupsCanvas.paintYAxis(height);
-            container.addChild(yaxis);
+            canvas.addChild(yaxis);
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
-            container.addChild(lines);
-            return container;
+            canvas.addChild(lines);
+            return canvas;
         }
         static paintTraceGroupLines(traceGroups) {
             let container = new PIXI.Container();
@@ -155,6 +155,8 @@
     //
     // main
     //
+    let style = { width: 1000, height: 600, backgroundColor: 0xFFFFFF };
+    let display = createDisplay(style);
     var traceGroups = {
         "client.tx.execute.insert:server.tx.stream.insert:query.insert": {
             "traces": {
@@ -205,8 +207,9 @@
             }
         }
     };
-    var traceGroupsCanvas = new TraceGroupsCanvas({width: 1000, height: 600}, traceGroups);
-    document.querySelector("#chart").appendChild(traceGroupsCanvas.getDisplay());
+    var traceGroupsCanvas = new TraceGroupsCanvas({width: style.width, height: style.height}, traceGroups);
+    display.stage.addChild(traceGroupsCanvas.getPainting());
+    document.querySelector("#chart").appendChild(display.view);
     // update dimension: traceGroupsCanvas.setDimension({width: 400, height: 300});
     // update data: traceGroupsCanvas.setTraceGroups(traceGroups);
     // display Iteration/Time: traceGroupsCanvas.setXAxisMode(Mode.ITERATION / Mode.TIME)
