@@ -13,6 +13,44 @@
         display.stage.scale.y = -1;
         return display;
     }
+    class TraceGroupXAxis {
+        // public
+        constructor(width) {
+            this.xaxis = TraceGroupXAxis.paintXAxis(width);
+        }
+        getPainting() {
+            return this.xaxis;
+        }
+        // private
+        static paintXAxis(width) {
+            let container = new PIXI.Container();
+            let line = new PIXI.Graphics();
+            line.lineStyle({width: 1, color: 0x000000, alpha: 1})
+            line.moveTo(0, 0);
+            line.lineTo(width, 0);
+            container.addChild(line);
+            return container;
+        }
+    }
+    class TraceGroupYAxis {
+        // public
+        constructor(height) {
+            this.yaxis = TraceGroupYAxis.paintYAxis(height);
+        }
+        getPainting() {
+            return this.yaxis;
+        }
+        // private
+        static paintYAxis(height) {
+            let container = new PIXI.Container();
+            let line = new PIXI.Graphics();
+            line.lineStyle({width: 1, color: 0x000000, alpha: 1})
+            line.moveTo(0, 0);
+            line.lineTo(0, height);
+            container.addChild(line);
+            return container;
+        }
+    }
     class TraceGroupLine {
         // public
         constructor(traceGroup) {
@@ -121,10 +159,10 @@
             canvas.position.x = margin;
             canvas.position.y = margin;
             let width = style.width - margin*2;
-            let height = style.height - margin*2;
-            let xaxis = TraceGroupsCanvas.paintXAxis(width);
+            let xaxis = new TraceGroupXAxis(width).getPainting();
             canvas.addChild(xaxis);
-            let yaxis = TraceGroupsCanvas.paintYAxis(height);
+            let height = style.height - margin*2;
+            let yaxis = new TraceGroupYAxis(height).getPainting();
             canvas.addChild(yaxis);
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
             canvas.addChild(lines);
@@ -136,20 +174,6 @@
                 container.addChild(new TraceGroupLine(traceGroups[key].traces).getPainting());
             }
             return container;
-        }
-        static paintXAxis(width) {
-            let xaxis = new PIXI.Graphics();
-            xaxis.lineStyle({width: 1, color: 0x000000, alpha: 1})
-            xaxis.moveTo(0, 0);
-            xaxis.lineTo(width, 0);
-            return xaxis;
-        }
-        static paintYAxis(height) {
-            let yaxis = new PIXI.Graphics();
-            yaxis.lineStyle({width: 1, color: 0x000000, alpha: 1})
-            yaxis.moveTo(0, 0);
-            yaxis.lineTo(0, height);
-            return yaxis;
         }
     }
     //
