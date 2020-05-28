@@ -10,25 +10,25 @@
     class TraceGroupLine {
         // public
         constructor(traceGroup) {
-            this.line = TraceGroupLine.createLineInteractive(traceGroup);
+            this.line = TraceGroupLine.paintTraceGroupLineInteractive(traceGroup);
         }
-        getVisual() {
+        getPaintings() {
             return this.line;
         }
         
         // private
-        static createLineInteractive(traceGroup) {
+        static paintTraceGroupLineInteractive(traceGroup) {
             let visual = TraceGroupLine.createLine();
             visual.on('pointerover', (event) => {
-                TraceGroupLine.paintLine({width: 1, color: 0x0000FF, alpha: 1}, visual, traceGroup);
+                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0x0000FF, alpha: 1}, visual, traceGroup);
             });
             visual.on('pointerout', (event) => {
-                TraceGroupLine.paintLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
+                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
             });
-            TraceGroupLine.paintLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
+            TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
             return visual;
         }
-        static paintLine(style, visual, traceGroup) {
+        static paintTraceGroupLine(style, visual, traceGroup) {
             visual.clear();
             visual.lineStyle(style);
             visual.moveTo(0, 0);
@@ -92,28 +92,40 @@
     class TraceGroupsCanvas {
         // public
         constructor(style, traceGroups) {
-            this.canvas = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
-            this.setTraceGroups(this.canvas, traceGroups);
+            this.display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
+            this.setTraceGroups(this.display, traceGroups);
         }
-        setTraceGroups(canvas, traceGroups) { 
-            this.canvas.stage.removeChildren();
-            TraceGroupsCanvas.paintCanvas(canvas, traceGroups);
+        setTraceGroups(display, traceGroups) { 
+            display.stage.removeChildren();
+            TraceGroupsCanvas.display(display, traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
         getVisual() {
-            return this.canvas.view;
+            return this.display.view;
         }
         // private
-        static paintCanvas(canvas, traceGroups) {
-            let line = [];
+        static paintTraceGroupLines(traceGroups) {
+            let lines = [];
             for (const key in traceGroups) {
-                line.push(new TraceGroupLine(traceGroups[key].traces));
+                lines.push(new TraceGroupLine(traceGroups[key].traces));
             }
-            for (let i = 0; i < line.length; i++) {
-                canvas.stage.addChild(line[i].getVisual())
+            return lines;
+        }
+        static paintXAxis() {
+            return null;
+        }
+        static paintYAxis() {
+            return null;
+        }
+        static display(display, traceGroups) {
+            let xaxis = TraceGroupsCanvas.paintXAxis();
+            let yaxis = TraceGroupsCanvas.paintYAxis();
+            let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
+            for (let i = 0; i < lines.length; i++) {
+                display.stage.addChild(lines[i].getPaintings())
             }
         }
     }
