@@ -92,12 +92,13 @@
     class TraceGroupsCanvas {
         // public
         constructor(style, traceGroups) {
+            this.style = style;
             this.display = TraceGroupsCanvas.createDisplay(style);
-            this.setTraceGroups(traceGroups);
+            this.setTraceGroups(style.width, style.height, traceGroups);
         }
-        setTraceGroups(traceGroups) { 
+        setTraceGroups(width, height, traceGroups) { 
             this.display.stage.removeChildren();
-            TraceGroupsCanvas.updateDisplay(this.display, traceGroups);
+            TraceGroupsCanvas.updateDisplay(this.display, width, height, traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
@@ -113,13 +114,17 @@
             display.stage.scale.y = -1;
             return display;
         }
-        static updateDisplay(display, traceGroups) {
-            let xaxis = TraceGroupsCanvas.paintXAxis();
-            // display.stage.addChild(xaxis.getPaintings());
-            let yaxis = TraceGroupsCanvas.paintYAxis();
-            // display.stage.addChild(yaxis.getPaintings());
+        static updateDisplay(display, width, height, traceGroups) {
+            let container = new PIXI.Container();
+            container.position.x = 20;
+            container.position.y = 20;
+            let xaxis = TraceGroupsCanvas.paintXAxis(width);
+            container.addChild(xaxis);
+            let yaxis = TraceGroupsCanvas.paintYAxis(height);
+            container.addChild(yaxis);
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
-            display.stage.addChild(lines);
+            container.addChild(lines);
+            display.stage.addChild(container);
         }
         static paintTraceGroupLines(traceGroups) {
             let container = new PIXI.Container();
@@ -128,11 +133,19 @@
             }
             return container;
         }
-        static paintXAxis() {
-            return null;
+        static paintXAxis(width) {
+            let xaxis = new PIXI.Graphics();
+            xaxis.lineStyle({width: 1, color: 0x000000, alpha: 1})
+            xaxis.moveTo(0, 0);
+            xaxis.lineTo(width, 0);
+            return xaxis;
         }
-        static paintYAxis() {
-            return null;
+        static paintYAxis(height) {
+            let yaxis = new PIXI.Graphics();
+            yaxis.lineStyle({width: 1, color: 0x000000, alpha: 1})
+            yaxis.moveTo(0, 0);
+            yaxis.lineTo(0, height);
+            return yaxis;
         }
     }
     //
