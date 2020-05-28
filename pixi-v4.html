@@ -94,11 +94,11 @@
         constructor(style, traceGroups) {
             this.style = style;
             this.display = TraceGroupsCanvas.createDisplay(style);
-            this.setTraceGroups(style.width, style.height, traceGroups);
+            this.setTraceGroups(traceGroups);
         }
-        setTraceGroups(width, height, traceGroups) { 
+        setTraceGroups(traceGroups) { 
             this.display.stage.removeChildren();
-            TraceGroupsCanvas.updateDisplay(this.display, width, height, traceGroups);
+            this.updateDisplay(traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
@@ -114,17 +114,19 @@
             display.stage.scale.y = -1;
             return display;
         }
-        static updateDisplay(display, width, height, traceGroups) {
+        updateDisplay(traceGroups) {
             let container = new PIXI.Container();
             container.position.x = 20;
             container.position.y = 20;
+            let width = this.style.width - 20*2;
+            let height = this.style.height - 20*2;
             let xaxis = TraceGroupsCanvas.paintXAxis(width);
             container.addChild(xaxis);
             let yaxis = TraceGroupsCanvas.paintYAxis(height);
             container.addChild(yaxis);
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
             container.addChild(lines);
-            display.stage.addChild(container);
+            this.display.stage.addChild(container);
         }
         static paintTraceGroupLines(traceGroups) {
             let container = new PIXI.Container();
