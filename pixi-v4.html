@@ -158,14 +158,15 @@
             let canvas = new PIXI.Container();
             canvas.position.x = margin;
             canvas.position.y = margin;
-            let width = style.width - margin*2;
-            let xaxis = new TraceGroupXAxis(width).getPainting();
-            canvas.addChild(xaxis);
-            let height = style.height - margin*2;
-            let yaxis = new TraceGroupYAxis(height).getPainting();
-            canvas.addChild(yaxis);
-            let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
-            canvas.addChild(lines);
+            canvas.addChild(
+                new TraceGroupXAxis(style.width - margin*2).getPainting()
+            );
+            canvas.addChild(
+                new TraceGroupYAxis(style.height - margin*2).getPainting()
+            );
+            canvas.addChild(
+                TraceGroupsCanvas.paintTraceGroupLines(traceGroups)
+            );
             return canvas;
         }
         static paintTraceGroupLines(traceGroups) {
