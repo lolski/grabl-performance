@@ -92,12 +92,12 @@
     class TraceGroupsCanvas {
         // public
         constructor(style, traceGroups) {
-            this.display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
+            this.display = TraceGroupsCanvas.createDisplay(style);
             this.setTraceGroups(this.display, traceGroups);
         }
         setTraceGroups(display, traceGroups) { 
             display.stage.removeChildren();
-            TraceGroupsCanvas.display(display, traceGroups);
+            TraceGroupsCanvas.updateDisplay(display, traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
@@ -107,6 +107,12 @@
             return this.display.view;
         }
         // private
+        static createDisplay(style) {
+            let display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });this.display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
+            display.stage.position.y = style.height;
+            display.stage.scale.y = -1;
+            return display;
+        }
         static paintTraceGroupLines(traceGroups) {
             let lines = [];
             for (const key in traceGroups) {
@@ -120,9 +126,11 @@
         static paintYAxis() {
             return null;
         }
-        static display(display, traceGroups) {
+        static updateDisplay(display, traceGroups) {
             let xaxis = TraceGroupsCanvas.paintXAxis();
+            // display.stage.addChild(xaxis.getPaintings());
             let yaxis = TraceGroupsCanvas.paintYAxis();
+            // display.stage.addChild(yaxis.getPaintings());
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
             for (let i = 0; i < lines.length; i++) {
                 display.stage.addChild(lines[i].getPaintings())
