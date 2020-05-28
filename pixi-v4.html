@@ -12,7 +12,7 @@
         constructor(traceGroup) {
             this.line = TraceGroupLine.paintTraceGroupLineInteractive(traceGroup);
         }
-        getPaintings() {
+        getPainting() {
             return this.line;
         }
         
@@ -93,12 +93,19 @@
         // public
         constructor(style, traceGroups) {
             this.style = style;
-            this.display = TraceGroupsCanvas.createDisplay(style);
+            this.display = new PIXI.Application(
+                { width: style.width, height: style.height, backgroundColor: 0xFFFFFF }
+            );
+            this.display.stage.position.y = this.style.height;
+            this.display.stage.scale.y = -1;
             this.setTraceGroups(traceGroups);
         }
         setTraceGroups(traceGroups) { 
             this.display.stage.removeChildren();
-            this.updateDisplay(traceGroups);
+            this.paintTraceGroupCanvas(traceGroups)
+            this.display.stage.addChild(
+                this.paintTraceGroupCanvas(traceGroups)
+            );
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
@@ -108,30 +115,25 @@
             return this.display.view;
         }
         // private
-        static createDisplay(style) {
-            let display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });this.display = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
-            display.stage.position.y = style.height;
-            display.stage.scale.y = -1;
-            return display;
-        }
-        updateDisplay(traceGroups) {
+        paintTraceGroupCanvas(traceGroups) {
+            let margin = 20;
             let container = new PIXI.Container();
-            container.position.x = 20;
-            container.position.y = 20;
-            let width = this.style.width - 20*2;
-            let height = this.style.height - 20*2;
+            container.position.x = margin;
+            container.position.y = margin;
+            let width = this.style.width - margin*2;
+            let height = this.style.height - margin*2;
             let xaxis = TraceGroupsCanvas.paintXAxis(width);
             container.addChild(xaxis);
             let yaxis = TraceGroupsCanvas.paintYAxis(height);
             container.addChild(yaxis);
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
             container.addChild(lines);
-            this.display.stage.addChild(container);
+            return container;
         }
         static paintTraceGroupLines(traceGroups) {
             let container = new PIXI.Container();
             for (const key in traceGroups) {
-                container.addChild(new TraceGroupLine(traceGroups[key].traces).getPaintings());
+                container.addChild(new TraceGroupLine(traceGroups[key].traces).getPainting());
             }
             return container;
         }
