@@ -93,11 +93,11 @@
         // public
         constructor(style, traceGroups) {
             this.display = TraceGroupsCanvas.createDisplay(style);
-            this.setTraceGroups(this.display, traceGroups);
+            this.setTraceGroups(traceGroups);
         }
-        setTraceGroups(display, traceGroups) { 
-            display.stage.removeChildren();
-            TraceGroupsCanvas.updateDisplay(display, traceGroups);
+        setTraceGroups(traceGroups) { 
+            this.display.stage.removeChildren();
+            TraceGroupsCanvas.updateDisplay(this.display, traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
@@ -113,28 +113,26 @@
             display.stage.scale.y = -1;
             return display;
         }
-        static paintTraceGroupLines(traceGroups) {
-            let lines = [];
-            for (const key in traceGroups) {
-                lines.push(new TraceGroupLine(traceGroups[key].traces));
-            }
-            return lines;
-        }
-        static paintXAxis() {
-            return null;
-        }
-        static paintYAxis() {
-            return null;
-        }
         static updateDisplay(display, traceGroups) {
             let xaxis = TraceGroupsCanvas.paintXAxis();
             // display.stage.addChild(xaxis.getPaintings());
             let yaxis = TraceGroupsCanvas.paintYAxis();
             // display.stage.addChild(yaxis.getPaintings());
             let lines = TraceGroupsCanvas.paintTraceGroupLines(traceGroups);
-            for (let i = 0; i < lines.length; i++) {
-                display.stage.addChild(lines[i].getPaintings())
+            display.stage.addChild(lines);
+        }
+        static paintTraceGroupLines(traceGroups) {
+            let container = new PIXI.Container();
+            for (const key in traceGroups) {
+                container.addChild(new TraceGroupLine(traceGroups[key].traces).getPaintings());
             }
+            return container;
+        }
+        static paintXAxis() {
+            return null;
+        }
+        static paintYAxis() {
+            return null;
         }
     }
     //
