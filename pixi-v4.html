@@ -18,22 +18,22 @@
         
         // private
         static paintTraceGroupLineInteractive(traceGroup) {
-            let visual = TraceGroupLine.createLine();
-            visual.on('pointerover', (event) => {
-                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0x0000FF, alpha: 1}, visual, traceGroup);
+            let line = TraceGroupLine.createLine();
+            line.on('pointerover', (event) => {
+                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0x0000FF, alpha: 1}, line, traceGroup);
             });
-            visual.on('pointerout', (event) => {
-                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
+            line.on('pointerout', (event) => {
+                TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, line, traceGroup);
             });
-            TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
-            return visual;
+            TraceGroupLine.paintTraceGroupLine({width: 1, color: 0xFF0000, alpha: 1}, line, traceGroup);
+            return line;
         }
-        static paintTraceGroupLine(style, visual, traceGroup) {
-            visual.clear();
-            visual.lineStyle(style);
-            visual.moveTo(0, 0);
+        static paintTraceGroupLine(style, line, traceGroup) {
+            line.clear();
+            line.lineStyle(style);
+            line.moveTo(0, 0);
             for (const key in traceGroup) {
-                visual.lineTo(
+                line.lineTo(
                     traceGroup[key].iteration * 100,
                     traceGroup[key].duration
                 )
@@ -103,7 +103,7 @@
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
-        getVisual() {
+        getDisplay() {
             return this.display.view;
         }
         // private
@@ -183,7 +183,7 @@
         }
     };
     var traceGroupsCanvas = new TraceGroupsCanvas({width: 1000, height: 600}, traceGroups);
-    document.querySelector("#chart").appendChild(traceGroupsCanvas.getVisual());
+    document.querySelector("#chart").appendChild(traceGroupsCanvas.getDisplay());
     // update dimension: traceGroupsCanvas.setDimension({width: 400, height: 300});
     // update data: traceGroupsCanvas.setTraceGroups(traceGroups);
     // display Iteration/Time: traceGroupsCanvas.setXAxisMode(Mode.ITERATION / Mode.TIME)
