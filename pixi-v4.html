@@ -93,37 +93,31 @@
             return visual;
         }
     }
-    class TraceGroupsChart {
+    class TraceGroupsCanvas {
         // public
         constructor(style, traceGroups) {
-            this.pixiApp = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
-            this.setTraceGroups(traceGroups);
+            this.canvas = new PIXI.Application({ width: style.width, height: style.height, backgroundColor: 0xFFFFFF });
+            this.setTraceGroups(this.canvas, traceGroups);
         }
-        setTraceGroups(traceGroups) { 
-            this.traceGroups = traceGroups;
-            this.traceGroupVisuals = this.createTraceGroupVisuals(traceGroups);
-            this.draw();
+        setTraceGroups(canvas, traceGroups) { 
+            this.canvas.stage.removeChildren();
+            TraceGroupsCanvas.paintCanvas(canvas, traceGroups);
         }
         setDimension(dimension) {}
         setXAxisMode(mode) {}
         setViewMode(mode) {}
         selectLine(line) {}
         getVisual() {
-            return this.pixiApp.view;
+            return this.canvas.view;
         }
-
         // private
-        createTraceGroupVisuals(traceGroups) {
-            let visuals = [];
+        static paintCanvas(canvas, traceGroups) {
+            let line = [];
             for (const key in traceGroups) {
-                visuals.push(new TraceGroupLine(traceGroups[key].traces));
+                line.push(new TraceGroupLine(traceGroups[key].traces));
             }
-            return visuals;
-        }
-        draw() {
-            this.pixiApp.stage.removeChildren();
-            for (let i = 0; i < this.traceGroupVisuals.length; i++) {
-                this.pixiApp.stage.addChild(this.traceGroupVisuals[i].getVisual())
+            for (let i = 0; i < line.length; i++) {
+                canvas.stage.addChild(line[i].getVisual())
             }
         }
     }
@@ -180,13 +174,13 @@
             }
         }
     };
-    var traceGroupsChart = new TraceGroupsChart({width: 1000, height: 600}, traceGroups);
-    document.querySelector("#chart").appendChild(traceGroupsChart.getVisual());
-    // update dimension: traceGroupsChart.setDimension({width: 400, height: 300});
-    // update data: traceGroupsChart.setData(data);
-    // display Iteration/Time: traceGroupsChart.setXAxisMode(Mode.ITERATION / Mode.TIME)
-    // display Line/Trend: traceGroupsChart.setViewMode(Mode.LINE / Mode.TREND)
-    // select a single line: traceGroupsChart.selectLine(
+    var traceGroupsCanvas = new TraceGroupsCanvas({width: 1000, height: 600}, traceGroups);
+    document.querySelector("#chart").appendChild(traceGroupsCanvas.getVisual());
+    // update dimension: traceGroupsCanvas.setDimension({width: 400, height: 300});
+    // update data: traceGroupsCanvas.setTraceGroups(traceGroups);
+    // display Iteration/Time: traceGroupsCanvas.setXAxisMode(Mode.ITERATION / Mode.TIME)
+    // display Line/Trend: traceGroupsCanvas.setViewMode(Mode.LINE / Mode.TREND)
+    // select a single line: traceGroupsCanvas.selectLine(
     //   'client.tx.execute.insert:server.tx.stream.insert:query.insert'
     // )
 </script>
