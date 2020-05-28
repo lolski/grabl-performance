@@ -10,29 +10,25 @@
     class TraceGroupLine {
         // public
         constructor(traceGroup) {
-            this.setTraceGroup(traceGroup);
-        }
-        setTraceGroup(traceGroup) {
-            this.traceGroup = traceGroup;
-            this.traceGroupVisual = this.createTraceGroupVisual(traceGroup);
+            this.line = TraceGroupLine.createLineInteractive(traceGroup);
         }
         getVisual() {
-            return this.traceGroupVisual;
+            return this.line;
         }
         
         // private
-        createTraceGroupVisual(traceGroup) {
-            let visual = this.createLine();
+        static createLineInteractive(traceGroup) {
+            let visual = TraceGroupLine.createLine();
             visual.on('pointerover', (event) => {
-                this.x({width: 1, color: 0x0000FF, alpha: 1}, visual, this.traceGroup);
+                TraceGroupLine.paintLine({width: 1, color: 0x0000FF, alpha: 1}, visual, traceGroup);
             });
             visual.on('pointerout', (event) => {
-                this.x({width: 1, color: 0xFF0000, alpha: 1}, visual, this.traceGroup);
+                TraceGroupLine.paintLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
             });
-            this.x({width: 1, color: 0xFF0000, alpha: 1}, visual, this.traceGroup);
+            TraceGroupLine.paintLine({width: 1, color: 0xFF0000, alpha: 1}, visual, traceGroup);
             return visual;
         }
-        x(style, visual, traceGroup) {
+        static paintLine(style, visual, traceGroup) {
             visual.clear();
             visual.lineStyle(style);
             visual.moveTo(0, 0);
@@ -43,11 +39,11 @@
                 )
             }
         }
-        createLine() {
-            let visual = new PIXI.Graphics();
-            visual.interactive = true;
+        static createLine() {
+            let line = new PIXI.Graphics();
+            line.interactive = true;
             
-            visual.geometry.containsPoint = function containsPoint(point) {
+            line.geometry.containsPoint = function containsPoint(point) {
                 var graphicsData = this.graphicsData;
                 
                 for (var i = 0; i < graphicsData.length; ++i) {
@@ -90,7 +86,7 @@
 
                 return false;
             }
-            return visual;
+            return line;
         }
     }
     class TraceGroupsCanvas {
