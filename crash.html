@@ -6,7 +6,7 @@
         <script src="https://d3js.org/d3-array.v2.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
     </head>
-    <body>
+    <body style="background-color: black;">
         <div id="chart-0"></div>
         <div id="chart-1"></div>
         <div id="chart-2"></div>
@@ -24,6 +24,15 @@
         <div id="chart-14"></div>
         <div id="chart-15"></div>
         <div id="chart-16"></div>
+        <div id="chart-17"></div>
+        <div id="chart-18"></div>
+        <div id="chart-19"></div>
+        <div id="chart-20"></div>
+        <div id="chart-21"></div>
+        <div id="chart-22"></div>
+        <div id="chart-23"></div>
+        <div id="chart-24"></div>
+        <div id="chart-25"></div>
     </body>
     <script type="text/javascript">
         let random_int = (min, max) => {
@@ -51,9 +60,9 @@
         let width = 800;
         let height = 600;
         let config = {
-            chart_count: 17,
-            line_count: 1000,
-            point_count: 1000,
+            chart_count: 25,
+            line_count: 5,
+            point_count: 5,
             max_y: 1000,
             start_min_y: 0,
             start_max_y: 1000,
@@ -69,7 +78,9 @@
         let scale_x = d3.scaleLinear().domain([0, config.point_count - 1]).range([0, width]);
         let scale_y = d3.scaleLinear().domain([0, config.max_y - 1]).range([height, 0]);
         let data = generate_line_data(config);
-        for (let dc_idx = 0; dc_idx < data.length; ++dc_idx) {
+
+        const render = (dc_idx) => {
+            console.log(dc_idx);
             let chart = new PIXI.Application({width: width, height: height, backgroundColor: 0xFFFFFF});
             for (let dl_idx = 0; dl_idx < data[dc_idx].lines.length; ++dl_idx) {
                 let line = new PIXI.Graphics();
@@ -81,6 +92,19 @@
                 chart.stage.addChild(line);
             }
             document.querySelector("#chart-" + dc_idx).appendChild(chart.view);
+        };
+
+        for (let dc_idx = 0; dc_idx < 15; ++dc_idx) {
+            render(dc_idx);
         }
+
+        setTimeout(function() {
+            for (let i = 15; i < 25; i++) {
+                render(i);
+                console.log(`rendered ${i}`);
+            }
+        }, 3000);
+
+
     </script>
 </html>
